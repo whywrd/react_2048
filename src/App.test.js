@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import TestRenderer from 'react-test-renderer'
-import {App, Game, Score, ArrayTransformer, ColorUtils, FontUtils} from './App';
+import TestRenderer from 'react-test-renderer';
+import {App, Game, Score, ArrayTransformer, ColorUtils, TouchController} from './App';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
@@ -287,3 +287,123 @@ describe("Score", function() {
   });
 
 });
+
+
+describe('TouchController', function() {
+
+  it("should detect an unambiguous swipe up", function() {
+    let div = document.createElement('div');
+    const startTouchEvent = {
+      touches: [{'screenX': 0, 'screenY': 0}],
+    }
+    const touchMoveEvent = {
+      touches: [{'screenX': 0, 'screenY': TouchController.minDistance}],
+    }
+    const endTouchEvent = {};
+    
+    let moveHandler = {
+      direction: null,
+      handleMove: function(direction){moveHandler.direction = direction},
+    }
+
+    let controller = new TouchController(moveHandler.handleMove);
+    controller.start(startTouchEvent);
+    controller.move(touchMoveEvent);
+    controller.end(endTouchEvent);
+
+    expect(moveHandler.direction).toEqual('ArrowUp');
+  })
+
+  it("should detect an unambiguous swipe down", function() {
+    let div = document.createElement('div');
+    const startTouchEvent = {
+      touches: [{'screenX': 0, 'screenY': TouchController.minDistance}],
+    }
+    const touchMoveEvent = {
+      touches: [{'screenX': 0, 'screenY': 0}],
+    }
+    
+    let moveHandler = {
+      direction: null,
+      handleMove: function(direction){moveHandler.direction = direction},
+    }
+
+    let controller = new TouchController(moveHandler.handleMove);
+    controller.start(startTouchEvent);
+    controller.move(touchMoveEvent);
+    controller.end();
+
+    expect(moveHandler.direction).toEqual('ArrowDown');
+  })
+
+  it("should detect an unambiguous swipe right", function() {
+    let div = document.createElement('div');
+    const startTouchEvent = {
+      touches: [{'screenX': 0, 'screenY': 0}],
+    }
+    const touchMoveEvent = {
+      touches: [{'screenX': TouchController.minDistance, 'screenY': 0}],
+    }
+    const endTouchEvent = {};
+    
+    let moveHandler = {
+      direction: null,
+      handleMove: function(direction){moveHandler.direction = direction},
+    }
+
+    let controller = new TouchController(moveHandler.handleMove);
+    controller.start(startTouchEvent);
+    controller.move(touchMoveEvent);
+    controller.end(endTouchEvent);
+
+    expect(moveHandler.direction).toEqual('ArrowRight');
+  })
+
+  it("should detect an unambiguous swipe left", function() {
+    let div = document.createElement('div');
+    const startTouchEvent = {
+      touches: [{'screenX': TouchController.minDistance, 'screenY': 0}],
+    }
+    const touchMoveEvent = {
+      touches: [{'screenX': 0, 'screenY': 0}],
+    }
+    const endTouchEvent = {};
+    
+    let moveHandler = {
+      direction: null,
+      handleMove: function(direction){moveHandler.direction = direction},
+    }
+
+    let controller = new TouchController(moveHandler.handleMove);
+    controller.start(startTouchEvent);
+    controller.move(touchMoveEvent);
+    controller.end(endTouchEvent);
+
+    expect(moveHandler.direction).toEqual('ArrowLeft');
+  })
+
+  it("should detect an ambiguous swipe right", function() {
+    let div = document.createElement('div');
+    const startTouchEvent = {
+      touches: [{'screenX': 0, 'screenY': 0}],
+    }
+    const touchMoveEvent = {
+      touches: [{'screenX': TouchController.minDistance, 
+                 'screenY': TouchController.minDistance - 1}],
+    }
+    const endTouchEvent = {};
+    
+    let moveHandler = {
+      direction: null,
+      handleMove: function(direction){moveHandler.direction = direction},
+    }
+
+    let controller = new TouchController(moveHandler.handleMove);
+    controller.start(startTouchEvent);
+    controller.move(touchMoveEvent);
+    controller.end(endTouchEvent);
+
+    expect(moveHandler.direction).toEqual('ArrowRight');
+  })
+
+})

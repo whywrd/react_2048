@@ -53,6 +53,7 @@ class Game extends Component {
       lastKey: null,
       colors: new ColorUtils(props.dim),
       gameOver: false,
+      touch: new TouchController(),
     };
   }
 
@@ -64,7 +65,12 @@ class Game extends Component {
 
   render() {
     return (
-    <div className="game-container" onKeyDown={(e) => this.handleMove(e.key)} tabIndex="0">
+    <div className="game-container" 
+      onKeyDown={(e) => this.handleMove(e.key)} 
+      onTouchStart={(e) => this.state.touch.start(e)}
+      onTouchMove={(e) => this.state.touch.move(e)}
+      onTouchEnd={(e) => this.handleMove(this.state.touch.end())}
+      tabIndex="0">
       <div className="game">
         <div className="board-container">
           {this.state.gameOver ? (<GameSummary score={this.state.score} reset={() => this.resetGame()}/>) : (null)}
@@ -439,6 +445,53 @@ class ColorUtils {
 
 }
 
+
+class TouchController {
+
+  static minDistance = 5;
+
+  constructor () {
+    this.startX = null;
+    this.startY = null;
+    this.endX = null;
+    this.endY = null;
+  }
+
+  start(touchEvent) {
+    this.startX = touchEvent.touches[0].clientX;
+    this.startY = touchEvent.touches[0].clientY;
+  }
+
+  move(touchEvent) {
+    this.endX = touchEvent.touches[0].clientX;
+    this.endY = touchEvent.touches[0].clientY;
+  }
+
+  // called on touchend event
+  end(callback) {
+    const xDiff = this.endX - this.startX;
+    const yDiff = this.endY - this.startY;
+    var direction = null;
+    if ((xDiff ** 2 + yDiff ** 2) >= TouchController.minDistance ** 2) {
+      if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        if (xDiff > yDiff) {
+          direction = 'ArrowRight';
+        } else {
+          direction = 'ArrowLeft'
+        }
+      } else {
+        if (yDiff > 0) {
+          direction = 'ArrowDown';
+        } else {
+          direction = 'ArrowUp';
+        }
+      }
+    }
+    return direction;
+  }
+
+}
+
 class App extends Component {
   render() {
     return (
@@ -447,4 +500,4 @@ class App extends Component {
   }
 }
 
-export {App, Game, Score, ArrayTransformer, ColorUtils};
+export {App, Game, Score, ArrayTransformer, ColorUtils, TouchController};
