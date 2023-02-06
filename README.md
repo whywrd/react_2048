@@ -1,1 +1,1 @@
-whywrd.com/2048
+hywrd.com/2048
